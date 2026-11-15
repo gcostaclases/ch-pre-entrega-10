@@ -3,6 +3,18 @@
 {% block title %}Posts | Mi Blog{% endblock %}
 
 {% block content %}
-  <h2>Listado de posts</h2>
-  <p>Todavía no trabajamos con este archivo.</p>
+  <h1>{{ page_title }}</h1>
+
+  {% for post in posts %}
+    <article>
+      <h2>{{ post.titulo }}</h2>
+      <p>Escrito por {{ post.autor }}</p>
+      <p>Publicado el {{ post.fecha_creacion|date:"d/m/Y H:i" }}</p>
+      <p>{{ post.contenido|truncatewords:40 }}</p>
+      {% comment %} Uso post.get_estado_display para que se muestre "Publicado" con mayúscula, si utilizara post.estado me mostraría "publicado" todo minúsculas {% endcomment %}
+      <p>Estado: {{ post.get_estado_display }}</p>
+    </article>
+  {% empty %}
+    <p>Todavía no hay publicaciones.</p>
+  {% endfor %}
 {% endblock %}
