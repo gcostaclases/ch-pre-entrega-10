@@ -1,29 +1,43 @@
-# Blog Django - Pre-entrega 8
+# Blog Django - Pre-entrega 9
 
-Proyecto de un blog web desarrollado con Django. En esta entrega, la base
-creada en la pre-entrega 7 se transforma en un sitio navegable con páginas
-HTML, templates reutilizables y estilos CSS personalizados.
+Proyecto de un blog web desarrollado con Django. Esta entrega continúa el
+trabajo de la pre-entrega 8 y conecta el sitio con una base de datos SQLite
+mediante el ORM de Django.
 
-## Novedades de esta entrega
+## Novedades respecto de la pre-entrega 8
 
-- Se agregaron vistas basadas en funciones que renderizan templates HTML.
-- Se creó un layout base reutilizable en `posts/templates/posts/base.html`.
-- Se implementó herencia de templates para evitar repetir la estructura del
-  sitio.
-- Se incorporó un menú de navegación entre las páginas principales.
-- Se agregaron las páginas:
-  - Inicio.
-  - Posts.
-  - Acerca de.
-- Se incorporaron archivos estáticos con una hoja de estilos CSS.
-- Se aplicaron estilos visuales al encabezado, menú, contenido, títulos,
-  párrafos y pie de página.
+- Se creó el modelo `Post` en `posts/models.py`.
+- Se agregaron los campos:
+  - `titulo`.
+  - `contenido`.
+  - `autor`.
+  - `fecha_creacion`, completado automáticamente con `auto_now_add=True`.
+  - `estado`, con las opciones Borrador, Publicado y Archivado.
+- Se implementó `__str__` para mostrar el título de cada publicación.
+- Se configuró el orden predeterminado de los posts por fecha de creación
+  descendente.
+- Se generó y aplicó la migración inicial del modelo.
+- Se registró `Post` en el panel de administración de Django.
+- Se creó `PostAdmin` con:
+  - Columnas de título, autor, fecha de creación y estado.
+  - Búsqueda por título, contenido y autor.
+  - Filtros por estado y fecha de creación.
+  - Edición directa del estado desde el listado.
+- Se incorporó el flujo de creación de un superusuario y carga de posts desde
+  `/admin/`.
+- La vista de listado dejó de utilizar contenido estático y consulta mediante
+  el ORM únicamente los posts publicados, ordenados por fecha de creación.
+- `lista_posts.html` muestra dinámicamente los posts con un bucle de Django
+  Template Language e informa cuando no hay publicaciones.
 
-Esta entrega todavía no utiliza modelos, formularios ni persistencia de datos.
-El objetivo es practicar el flujo:
+La entrega mantiene las funcionalidades de la pre-entrega 8: rutas, vistas,
+herencia de templates, menú de navegación, páginas de inicio, posts y acerca
+de, además de los estilos CSS.
+
+El flujo principal ahora es:
 
 ```text
-Ruta -> Vista -> Template -> Archivo estático
+Ruta -> Vista -> ORM -> Contexto -> Template -> Archivo estático
 ```
 
 ## Tecnologías utilizadas
@@ -50,11 +64,15 @@ blog_django/
 │   └── wsgi.py
 │
 └── posts/
-    ├── views.py
-    ├── urls.py
-    ├── models.py
     ├── admin.py
+    ├── apps.py
+    ├── models.py
     ├── tests.py
+    ├── urls.py
+    ├── views.py
+    ├── migrations/
+    │   ├── 0001_initial.py
+    │   └── __init__.py
     │
     ├── templates/
     │   └── posts/
@@ -65,8 +83,10 @@ blog_django/
     │
     └── static/
         └── posts/
-            └── css/
-                └── style.css
+            ├── css/
+            │   └── estilos.css
+            └── img/
+                └── logo-glups.png
 ```
 
 ## Rutas disponibles
@@ -74,7 +94,7 @@ blog_django/
 | Ruta | Página |
 | --- | --- |
 | `/` | Página de inicio |
-| `/posts/` | Listado de posts |
+| `/posts/` | Listado de posts publicados |
 | `/acerca/` | Información sobre el autor y el sitio |
 | `/admin/` | Panel de administración de Django |
 
@@ -83,7 +103,7 @@ blog_django/
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/gcostaclases/ch-pre-entrega-8.git
+git clone https://github.com/gcostaclases/ch-pre-entrega-9.git
 cd blog_django
 ```
 
@@ -121,7 +141,22 @@ Windows PowerShell:
 pip install -r requirements.txt
 ```
 
-### 5. Ejecutar el servidor
+### 5. Aplicar las migraciones
+
+```bash
+python manage.py migrate
+```
+
+### 6. Crear un superusuario
+
+```bash
+python manage.py createsuperuser
+```
+
+Seguí las instrucciones de la terminal para definir el nombre de usuario,
+email y contraseña.
+
+### 7. Ejecutar el servidor
 
 ```bash
 python manage.py runserver
@@ -129,7 +164,12 @@ python manage.py runserver
 
 Luego, abrir [http://127.0.0.1:8000/](http://127.0.0.1:8000/) en el navegador.
 
+Para administrar las publicaciones, ingresar en
+[http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) con el
+superusuario y crear al menos tres posts. La página `/posts/` mostrará solo
+las publicaciones cuyo estado sea `Publicado`.
+
 ## Aplicación principal
 
-- `posts`: aplicación encargada de las páginas, vistas, templates y archivos
-  estáticos del blog.
+- `posts`: aplicación encargada de los modelos, migraciones, administración,
+  vistas, templates y archivos estáticos del blog.
