@@ -1,0 +1,65 @@
+{% extends "posts/base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} | Mi Blog{% endblock %}
+
+{% block content %}
+  <h2>{{ page_title }}</h2>
+
+  <div class="form-card">
+    <form action="" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <div>
+        {{ form.titulo.label_tag }}
+        {{ form.titulo }}
+        {{ form.titulo.errors }}
+      </div>
+
+      <div>
+        {{ form.contenido.label_tag }}
+        {{ form.contenido }}
+        {{ form.contenido.errors }}
+      </div>
+
+      <div>
+        {{ form.autor.label_tag }}
+        {{ form.autor }}
+        {{ form.autor.errors }}
+      </div>
+
+      <div>
+        {{ form.estado.label_tag }}
+        {{ form.estado }}
+        {{ form.estado.errors }}
+      </div>
+
+      <div class="image-field">
+        {% if post and post.imagen %}
+          <div class="image-preview">
+            <p>Imagen actual:</p>
+            <img class="form-image"
+                 src="{{ post.imagen.url }}"
+                 alt="Imagen actual de {{ post.titulo }}" />
+          </div>
+        {% endif %}
+
+        <div class="image-controls">
+          {% comment %} {{ form.imagen.label_tag }} {% endcomment %}
+          {{ form.imagen }}
+          {{ form.imagen.errors }}
+        </div>
+      </div>
+
+      <button type="submit">{{ texto_boton }}</button>
+    </form>
+  </div>
+  <div class="actions">
+    {% if post %}
+      <a class="button button-secondary"
+         href="{% url 'detalle_post' post.slug %}">Cancelar edición</a>
+    {% else %}
+      <a class="button button-secondary" href="{% url 'lista_posts' %}">Cancelar creación</a>
+    {% endif %}
+  </div>
+{% endblock %}

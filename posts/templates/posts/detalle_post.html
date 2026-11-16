@@ -1,0 +1,36 @@
+{% extends "posts/base.html" %}
+{% load static %}
+
+{% block title %}{{ post.titulo }} | Mi Blog{% endblock %}
+
+{% block content %}
+  <article class="post-detail">
+    <div class="detail-header">
+      <h2>{{ post.titulo }}</h2>
+      <span class="status">{{ post.get_estado_display }}</span>
+    </div>
+    <p class="post-meta"><strong>Autor:</strong> {{ post.autor }} · <strong>Fecha:</strong> {{ post.fecha_creacion }}</p>
+    <hr />
+    <p class="post-content">{{ post.contenido }}</p>
+
+    <figure class="post-detail-image">
+      {% if post.imagen %}
+        <img class="post-image"
+             src="{{ post.imagen.url }}"
+             alt="Imagen de {{ post.titulo }}" />
+      {% else %}
+        <img class="post-image post-image-default"
+             src="{% static 'posts/img/default.png' %}"
+             alt="Imagen por defecto de {{ post.titulo }}" />
+      {% endif %}
+    </figure>
+  </article>
+
+  <div class="actions">
+    <a class="button button-secondary" href="{% url 'lista_posts' %}">Volver al listado</a>
+    <a class="button" href="{% url 'editar_post' post.slug %}">Editar</a>
+    <a class="button button-danger"
+       href="{% url 'eliminar_post' post.slug %}">Eliminar</a>
+  </div>
+
+{% endblock %}

@@ -15,5 +15,8 @@ class PostAdmin(admin.ModelAdmin):
     # Permite editar el estado directamente desde la lista (sin necesidad de entrar al detalle del post)
     # Importante: el campo incluido en list_editable también debe estar en list_display.
     list_editable = ("estado",)
+    # Permite generar automáticamente el slug a partir del título al crear un nuevo post en el admin.
+    # Acá se ve solo el titulo pero en realidad se guarda el titulo + el id del post para asegurar que sea único.
+    prepopulated_fields = {"slug": ("titulo",)}
 
     # NOTA: Siempre revisar que los nombres usados en list_display, search_fields y list_filter existan realmente en el modelo.

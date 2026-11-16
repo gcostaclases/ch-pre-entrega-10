@@ -1,20 +1,50 @@
 {% extends "posts/base.html" %}
+{% load static %}
 
-{% block title %}Posts | Mi Blog{% endblock %}
+{% block title %}{{ page_title }} | Mi Blog{% endblock %}
 
 {% block content %}
-  <h1>{{ page_title }}</h1>
+  <div class="detail-header">
+    <h2>{{ page_title }}</h2>
+    <a class="button" href="{% url 'crear_post' %}">+ Crear post</a>
+  </div>
 
-  {% for post in posts %}
-    <article>
-      <h2>{{ post.titulo }}</h2>
-      <p>Escrito por {{ post.autor }}</p>
-      <p>Publicado el {{ post.fecha_creacion|date:"d/m/Y H:i" }}</p>
-      <p>{{ post.contenido|truncatewords:40 }}</p>
-      {% comment %} Uso post.get_estado_display para que se muestre "Publicado" con mayúscula, si utilizara post.estado me mostraría "publicado" todo minúsculas {% endcomment %}
-      <p>Estado: {{ post.get_estado_display }}</p>
-    </article>
-  {% empty %}
-    <p>Todavía no hay publicaciones.</p>
-  {% endfor %}
+  <section class="post-list">
+    {% for post in posts %}
+      <article class="post-card">
+        <a class="post-image-link" href="{% url 'detalle_post' post.slug %}">
+          {% if post.imagen %}
+            <img class="post-image"
+                 src="{{ post.imagen.url }}"
+                 alt="Imagen de {{ post.titulo }}" />
+          {% else %}
+            <img class="post-image post-image-default"
+                 src="{% static 'posts/img/default.png' %}"
+                 alt="Imagen por defecto de {{ post.titulo }}" />
+          {% endif %}
+        </a>
+
+        <div class="post-card-body">
+          <h3>
+            <a class="post-title-link" href="{% url 'detalle_post' post.slug %}">{{ post.titulo }}</a>
+          </h3>
+
+          <p class="post-meta">
+            Escrito por {{ post.autor }}
+            el {{ post.fecha_creacion|date:"d/m/Y H:i" }}
+          </p>
+          <p class="post-content">{{ post.contenido|truncatewords:40 }}</p>
+          <div class="actions">
+            <a class="button" href="{% url 'detalle_post' post.slug %}">Ver detalle</a>
+            <a class="button button-secondary"
+               href="{% url 'editar_post' post.slug %}">Editar</a>
+            <a class="button button-danger"
+               href="{% url 'eliminar_post' post.slug %}">Eliminar</a>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <p class="intro">Todavía no hay posts publicados.</p>
+    {% endfor %}
+  </section>
 {% endblock %}

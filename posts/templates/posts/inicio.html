@@ -3,7 +3,12 @@
 {% block title %}Inicio | Mi Blog{% endblock %}
 
 {% block content %}
-  <h1>Bienvenido a Mi Blog</h1>
-  <p>Un espacio para compartir ideas, experiencias y contenidos interesantes sobre distintos temas.</p>
-  <a href="{% url 'lista_posts' %}">Ver posts</a>
+  <section class="intro">
+    <h2>Bienvenido a mi blog</h2>
+    <p>Un espacio para compartir ideas, experiencias y contenidos interesantes sobre distintos temas.</p>
+    <div class="actions">
+      <a class="button" href="{% url 'lista_posts' %}">Explorar posts</a>
+      <a class="button button-secondary" href="{% url 'crear_post' %}">Crear un post</a>
+    </div>
+  </section>
 {% endblock %}

@@ -1,0 +1,20 @@
+{% extends "posts/base.html" %}
+
+{% block title %}Eliminar Post | Mi Blog{% endblock %}
+
+{% block content %}
+  <div class="confirmation-card">
+    <h2>Eliminar post</h2>
+    <p>¿Estás seguro de que querés eliminar el siguiente post?</p>
+    <h3>{{ post.titulo }}</h3>
+    <p class="post-content">{{ post.contenido|truncatewords:30 }}</p>
+    <div class="actions">
+      <form method="post">
+        {% csrf_token %}
+        <button class="button-danger" type="submit">Sí, eliminar</button>
+      </form>
+      <a class="button button-secondary"
+         href="{% url 'detalle_post' post.slug %}">Cancelar</a>
+    </div>
+  </div>
+{% endblock %}
