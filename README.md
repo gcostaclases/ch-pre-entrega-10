@@ -1,49 +1,52 @@
-# Blog Django - Pre-entrega 9
+# Blog Django - Pre-entrega 10
 
 Proyecto de un blog web desarrollado con Django. Esta entrega continúa el
-trabajo de la pre-entrega 8 y conecta el sitio con una base de datos SQLite
-mediante el ORM de Django.
+trabajo de la pre-entrega 9 y agrega un CRUD completo de publicaciones desde
+la interfaz del sitio, junto con la carga y visualización de imágenes.
 
-## Novedades respecto de la pre-entrega 8
+## Novedades respecto de la pre-entrega 9
 
-- Se creó el modelo `Post` en `posts/models.py`.
-- Se agregaron los campos:
-  - `titulo`.
-  - `contenido`.
-  - `autor`.
-  - `fecha_creacion`, completado automáticamente con `auto_now_add=True`.
-  - `estado`, con las opciones Borrador, Publicado y Archivado.
-- Se implementó `__str__` para mostrar el título de cada publicación.
-- Se configuró el orden predeterminado de los posts por fecha de creación
-  descendente.
-- Se generó y aplicó la migración inicial del modelo.
-- Se registró `Post` en el panel de administración de Django.
-- Se creó `PostAdmin` con:
-  - Columnas de título, autor, fecha de creación y estado.
-  - Búsqueda por título, contenido y autor.
-  - Filtros por estado y fecha de creación.
-  - Edición directa del estado desde el listado.
-- Se incorporó el flujo de creación de un superusuario y carga de posts desde
-  `/admin/`.
-- La vista de listado dejó de utilizar contenido estático y consulta mediante
-  el ORM únicamente los posts publicados, ordenados por fecha de creación.
-- `lista_posts.html` muestra dinámicamente los posts con un bucle de Django
-  Template Language e informa cuando no hay publicaciones.
+- Se agregó el campo opcional `imagen` al modelo `Post`, configurado con
+  `upload_to="posts/"`.
+- Se agregó el campo `slug` para identificar cada publicación mediante una URL
+  amigable y única.
+- Se creó `posts/forms.py` con `PostForm`, un `ModelForm` para crear y editar
+  publicaciones.
+- Se incorporó validación para exigir títulos de al menos cinco caracteres.
+- Se implementaron las operaciones CRUD desde el sitio:
+  - Crear publicaciones.
+  - Listar publicaciones publicadas.
+  - Ver el detalle de una publicación.
+  - Editar publicaciones existentes.
+  - Eliminar publicaciones con confirmación previa.
+- Los formularios de creación y edición procesan datos y archivos mediante
+  `request.POST` y `request.FILES`.
+- Se agregó soporte para imágenes mediante `MEDIA_URL` y `MEDIA_ROOT`.
+- Se configuró el proyecto para servir archivos media durante el desarrollo.
+- Se agregaron templates para el detalle, el formulario y la confirmación de
+  eliminación.
+- El listado y el detalle muestran la imagen cargada o una imagen por defecto
+  cuando el post no tiene imagen.
+- Se agregó la migración `0002_post_imagen_post_slug.py`.
+- Se incorporó Pillow en `requirements.txt` para poder utilizar
+  `ImageField`.
 
-La entrega mantiene las funcionalidades de la pre-entrega 8: rutas, vistas,
-herencia de templates, menú de navegación, páginas de inicio, posts y acerca
-de, además de los estilos CSS.
+La entrega mantiene las funcionalidades de la pre-entrega 9: modelo `Post`
+con estados, persistencia en SQLite, listado mediante el ORM, administración
+desde `/admin/`, navegación, páginas de inicio y acerca de, herencia de
+templates y estilos CSS.
 
-El flujo principal ahora es:
+El flujo principal para el CRUD es:
 
 ```text
-Ruta -> Vista -> ORM -> Contexto -> Template -> Archivo estático
+Ruta -> Vista -> ModelForm/ORM -> Base de datos y media -> Template
 ```
 
 ## Tecnologías utilizadas
 
 - Python
 - Django 6.1.3
+- Pillow 13.0.0
 - HTML5
 - CSS3
 - SQLite
@@ -56,6 +59,8 @@ blog_django/
 ├── README.md
 ├── requirements.txt
 ├── db.sqlite3
+├── media/
+│   └── posts/
 │
 ├── blog_project/
 │   ├── settings.py
@@ -66,12 +71,14 @@ blog_django/
 └── posts/
     ├── admin.py
     ├── apps.py
+    ├── forms.py
     ├── models.py
     ├── tests.py
     ├── urls.py
     ├── views.py
     ├── migrations/
     │   ├── 0001_initial.py
+    │   ├── 0002_post_imagen_post_slug.py
     │   └── __init__.py
     │
     ├── templates/
@@ -79,6 +86,9 @@ blog_django/
     │       ├── base.html
     │       ├── inicio.html
     │       ├── lista_posts.html
+    │       ├── detalle_post.html
+    │       ├── post_form.html
+    │       ├── post_confirm_delete.html
     │       └── acerca.html
     │
     └── static/
@@ -86,6 +96,7 @@ blog_django/
             ├── css/
             │   └── estilos.css
             └── img/
+                ├── default.png
                 └── logo-glups.png
 ```
 
@@ -95,68 +106,80 @@ blog_django/
 | --- | --- |
 | `/` | Página de inicio |
 | `/posts/` | Listado de posts publicados |
+| `/posts/crear/` | Formulario para crear un post |
+| `/post/<slug>/` | Detalle de un post |
+| `/post/<slug>/editar/` | Formulario para editar un post |
+| `/post/<slug>/eliminar/` | Confirmación para eliminar un post |
 | `/acerca/` | Información sobre el autor y el sitio |
 | `/admin/` | Panel de administración de Django |
 
+## Manejo de imágenes
+
+El modelo utiliza:
+
+```python
+imagen = models.ImageField(
+    upload_to="posts/",
+    null=True,
+    blank=True,
+)
+```
+
+Las imágenes subidas se guardan en `media/posts/`. En `settings.py` se
+configuraron:
+
+```python
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+```
+
+Además, `blog_project/urls.py` agrega las rutas para servir esos archivos
+cuando `DEBUG` está habilitado. El formulario utiliza
+`enctype="multipart/form-data"` y las vistas reciben `request.FILES` para que
+la carga funcione correctamente.
+
 ## Instalación y ejecución
 
-### 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/gcostaclases/ch-pre-entrega-9.git
-cd blog_django
-```
-
-### 2. Crear el entorno virtual
-
-macOS o Linux:
-
-```bash
-python3 -m venv .venv
-```
+### 1. Crear el entorno virtual
 
 Windows:
 
 ```powershell
 py -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
-
-### 3. Activar el entorno virtual
 
 macOS o Linux:
 
 ```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Windows PowerShell:
-
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
-
-### 4. Instalar las dependencias
+### 2. Instalar las dependencias
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Aplicar las migraciones
+Pillow se instala junto con el resto de las dependencias y es necesario para
+trabajar con `ImageField`.
+
+### 3. Aplicar las migraciones
 
 ```bash
 python manage.py migrate
 ```
 
-### 6. Crear un superusuario
+### 4. Crear un superusuario (opcional)
+
+El panel de administración continúa disponible para gestionar publicaciones:
 
 ```bash
 python manage.py createsuperuser
 ```
 
-Seguí las instrucciones de la terminal para definir el nombre de usuario,
-email y contraseña.
-
-### 7. Ejecutar el servidor
+### 5. Ejecutar el servidor
 
 ```bash
 python manage.py runserver
@@ -164,12 +187,23 @@ python manage.py runserver
 
 Luego, abrir [http://127.0.0.1:8000/](http://127.0.0.1:8000/) en el navegador.
 
-Para administrar las publicaciones, ingresar en
-[http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/) con el
-superusuario y crear al menos tres posts. La página `/posts/` mostrará solo
-las publicaciones cuyo estado sea `Publicado`.
+## Cómo probar el CRUD y la carga de imágenes
+
+1. Ingresar en `/posts/crear/`.
+2. Completar título, contenido, autor y estado.
+3. Seleccionar una imagen opcional y guardar el post.
+4. Verificar la imagen en el listado y en el detalle del post.
+5. Entrar en `/post/<slug>/editar/` para modificar los datos o cambiar la
+   imagen.
+6. Entrar en `/post/<slug>/eliminar/` y confirmar la eliminación.
+7. Crear también un post sin imagen para comprobar que se muestra la imagen
+   predeterminada sin romper el template.
+
+El listado muestra únicamente posts cuyo estado es `Publicado`. Los posts
+pueden seguir administrándose desde
+[http://127.0.0.1:8000/admin/](http://127.0.0.1:8000/admin/).
 
 ## Aplicación principal
 
-- `posts`: aplicación encargada de los modelos, migraciones, administración,
-  vistas, templates y archivos estáticos del blog.
+- `posts`: aplicación encargada del modelo, migraciones, formulario,
+  administración, vistas CRUD, templates y archivos estáticos del blog.
